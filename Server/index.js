@@ -8,10 +8,10 @@ app.use(cors());
 
 const server = http.createServer(app);
 
-// Allow connection from ANYWHERE
+// ALLOW ALL CONNECTIONS
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: "*", // This is crucial for online play
     methods: ["GET", "POST"]
   }
 });
@@ -25,7 +25,6 @@ function generateBoard() {
   return Array(BOARD_HEIGHT).fill(null).map(() => Array(BOARD_WIDTH).fill(null));
 }
 
-// WIN LOGIC
 function checkWin(board, player) {
     // Check horizontal
     for (let r = 0; r < BOARD_HEIGHT; r++) {
@@ -56,7 +55,7 @@ function checkWin(board, player) {
 }
 
 io.on('connection', (socket) => {
-  console.log(`Player connected: ${socket.id}`);
+  console.log(`User Connected: ${socket.id}`); // Log connection to terminal
 
   socket.on('joinRoom', ({ playerName, room }) => {
     if (!rooms[room]) {
@@ -80,6 +79,8 @@ io.on('connection', (socket) => {
     currentRoom.playerCount++;
     socket.join(room);
 
+    console.log(`${playerName} joined Room: ${room} as ${playerType}`);
+
     socket.emit('roomJoined', {
       room,
       yourName: playerName,
@@ -87,7 +88,6 @@ io.on('connection', (socket) => {
       opponentName: 'Waiting...'
     });
 
-    // If 2 players are present
     if (currentRoom.playerCount === 2) {
         const p1 = currentRoom.players['player1'];
         const p2 = currentRoom.players['player2'];
